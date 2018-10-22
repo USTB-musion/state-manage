@@ -1,30 +1,16 @@
-// 应用的共享状态
-let appState = {
-  title: {
-    text: 'React.js 小书',
-    color: 'red',
-  },
-  content: {
-    text: 'React.js 小书内容',
-    color: 'blue'
+function createStore (state, stateChanger) {
+  console.log('state:', state)
+  const listeners = []
+  const subscribe = (listener) => listeners.push(listener)
+  const getState = () => state
+  const dispatch = (action) => {
+    stateChanger(state, action)
+    listeners.forEach((listener) => listener())
+    console.log('listeners:')
   }
+  return { getState, dispatch, subscribe }
 }
 
-// 专门负责数据的修改，所有对数据的操作必须经过dispatch函数
-function dispatch (action) {
-  switch (action.type) {
-    case 'UPDATE_TITLE_TEXT':
-      appState.title.text = action.text
-      break
-    case 'UPDATE_TITLE_COLOR':
-      appState.title.color = action.color
-      break
-    default:
-      break
-  }
-}
-
-// 把状态的数据渲染到页面上
 function renderApp (appState) {
   renderTitle(appState.title)
   renderContent(appState.content)
@@ -42,8 +28,33 @@ function renderContent (content) {
   contentDOM.style.color = content.color
 }
 
-renderApp(appState) // 首次渲染页面
-dispatch({ type: 'UPDATE_TITLE_TEXT', text: '《React.js 小书》' }) // 修改标题文本
-dispatch({ type: 'UPDATE_TITLE_COLOR', color: 'red' }) // 修改标题颜色
-dispatch({ type: 'UPDATE_TITLE_TEXT', text: 'redux'}) // 修改标题文本
-renderApp(appState) // 把新的数据渲染到页面上
+let appState = {
+  title: {
+    text: 'React.js 小书',
+    color: 'red',
+  },
+  content: {
+    text: 'React.js 小书内容',
+    color: 'blue'
+  }
+}
+
+function stateChanger (state, action) {
+  switch (action.type) {
+    case 'UPDATE_TITLE_TEXT':
+      state.title.text = action.text
+      break
+    case 'UPDATE_TITLE_COLOR':
+      state.title.color = action.color
+      break
+    default:
+      break
+  }
+}
+
+const store = createStore(appState, stateChanger)
+store.subscribe(() => renderApp(store.getState())) // 监听数据变化
+
+renderApp(store.getState()) // 首次渲染页面
+store.dispatch({ type: 'UPDATE_TITLE_TEXT', text: '《React.js 小书001》' }) // 修改标题文本
+store.dispatch({ type: 'UPDATE_TITLE_COLOR', color: 'blue' }) // 修改标题颜色
