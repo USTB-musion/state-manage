@@ -1,21 +1,12 @@
-# todo-list
+## vuex实现的todo-list
+DEMO截图：
 
-> A Vue.js project
+<img src="https://user-gold-cdn.xitu.io/2018/10/23/166a132f28de9959?w=652&h=581&f=png&s=45477" width="400">
 
-## Build Setup
-
-``` bash
-# install dependencies
+```
+# 安装依赖
 npm install
 
-# serve with hot reload at localhost:8080
+# 运行demo
 npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
