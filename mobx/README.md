@@ -1,23 +1,13 @@
-mobx-react-boilerplate
-=====================
+## mobx实现的todo-list
+DEMO截图：
 
-A minimal application that combines [MobX](https://mobxjs.github.io/mobx) with [React](https://facebook.github.io/react).
-Supports ES6 and JSX compilation through babel.
+<img src="https://user-gold-cdn.xitu.io/2018/10/24/166a6cd9a86e8f6d?w=290&h=170&f=png&s=15835" width="400">
 
-* Support for React-Hot-Loader can be found in the [`with-hot-loader`](https://github.com/mobxjs/mobx-react-boilerplate/tree/with-hot-loader) branch
-* For a typescript based boilerplate, see [`mobx-react-typescript-boilerplate`](https://github.com/mobxjs/mobx-react-typescript-boilerplate)
-* To use MobX with create-react-app and decorators, [react-app-rewired](https://github.com/timarney/react-app-rewired/tree/master/packages/react-app-rewire-mobx) or this example using [custom-react-scripts](https://github.com/codylindley/mobx-react)
-
-
-### Run the example
 
 ```
-npm install
-npm start
+# 安装依赖
+yarn install
+
+# 运行demo
+yarn start
 ```
-
-Browser should open automatically. Otherwise, navigate to the URL reported in the terminal
-
-### Credits
-
-* [Mendix](http://github.com/mendix) for providing the opportunity to battle test this approach (we're hiring!).
