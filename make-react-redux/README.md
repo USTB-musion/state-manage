@@ -1,6 +1,6 @@
 ## 实现一个简易版的react-redux
 
-> 实现react-redux中的connect, provider, mapStateToProps, mapDispatchToProps方法
+> 实现react-redux中的connect, Provider, mapStateToProps, mapDispatchToProps方法
 
 ```
 import React, { Component } from 'react'
