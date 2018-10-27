@@ -25,10 +25,10 @@ flux,vuex,redux,mobx,rxjs....
 数据可以简单地分为两个部分，跨组件的数据和组件内的数据。组件内的数据大多数是和UI相关的，比如说单选框是否被勾选，按钮是否被点击。这些可以称为组件内状态数据。在react中，有一个概念叫做木偶组件，它里边存储的数据就是组件内状态数据。其实在市面上的很多UI组件库如element，ant design提供的都是木偶组件。另外一种数据就是跨组件的数据，比如父组件唤起子组件关闭，一旦面临着跨组件的交互，我们面临的问题就开始变得复杂了。这时候就需要一个机制来处理父子和兄弟组件通信。父组件对子组件就是props的传递，子组件对父组件react的处理方式就是父组件传递给子组件一个处理函数，由子组件调用，这样数据就由函数参数传给来父组件。vue的处理方式就是子组件通过$emit一个函数将数据由函数参数传给父组件由父组件接收调用。
 
 eventBus则为中央通信，provide是一个对象或返回一个对象的函数。该对象包含可注入其子孙的属性：
-<img src="https://user-gold-cdn.xitu.io/2018/10/26/166b11136b217df6?w=837&h=793&f=jpeg&s=92582" width="600">
+<img src="https://user-gold-cdn.xitu.io/2018/10/26/166b11136b217df6?w=837&h=793&f=jpeg&s=92582" width="400">
 
 inject 选项可以是：一个字符串数组，或一个对象。然后通过inject注入的值作为数据入口：
-<img src="https://user-gold-cdn.xitu.io/2018/10/26/166b113de7c11f5b?w=592&h=575&f=jpeg&s=58405" width="600">
+<img src="https://user-gold-cdn.xitu.io/2018/10/26/166b113de7c11f5b?w=592&h=575&f=jpeg&s=58405" width="400">
 
 但对于多个视图需要依赖于统一状态或者来自于不同视图的行为需要变更同一状态。单单依赖于组件间的通信就显得有些鸡肋了。
 
@@ -122,7 +122,7 @@ vuex的数据流简单地说为：
 ### 更好用的mobx
 MobX 是通过透明的函数响应式编程(transparently applying functional reactive programming - TFRP)使得状态管理变得简单和可扩展。以下为mobx的流程图：
 
-<img src="https://user-gold-cdn.xitu.io/2018/10/27/166b144698ad5c39?w=1407&h=483&f=png&s=79147" width="600">
+<img src="https://user-gold-cdn.xitu.io/2018/10/27/166b144698ad5c39?w=1407&h=483&f=png&s=79147" width="400">
 
 mobx和redux相对比，就有点差别了，如果说redux是体现函数式编程，mobx则更多体现面向对象的特点。
 mobx由几个要点：
