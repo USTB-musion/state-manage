@@ -27,10 +27,10 @@ if (
 }
 
 export {
-  createStore,
-  combineReducers,
-  bindActionCreators,
-  applyMiddleware,
-  compose,
-  __DO_NOT_USE__ActionTypes
+  createStore, // 创建redux store来放所有的state
+  combineReducers, // 将拆分的reducer组合起来 
+  bindActionCreators, // 把action creators转成拥有同名keys的对象，使用时可以直接调用
+  applyMiddleware, // 使用自定义的middleware来扩展redux
+  compose, // 从右到左组合多个函数，函数式编程
+  __DO_NOT_USE__ActionTypes // redux的私有属性，不要在自己的项目中使用这些属性
 }
