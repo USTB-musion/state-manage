@@ -139,31 +139,16 @@ export default function createStore(reducer, preloadedState, enhancer) {
   }
 
   /**
-   * Dispatches an action. It is the only way to trigger a state change.
+   * dispatch一个action，这是唯一的一种方式去触发state的改变
    *
-   * The `reducer` function, used to create the store, will be called with the
-   * current state tree and the given `action`. Its return value will
-   * be considered the **next** state of the tree, and the change listeners
-   * will be notified.
+   * @param {Object} action 一个plain对象，对象当中必须要有type属性
    *
-   * The base implementation only supports plain object actions. If you want to
-   * dispatch a Promise, an Observable, a thunk, or something else, you need to
-   * wrap your store creating function into the corresponding middleware. For
-   * example, see the documentation for the `redux-thunk` package. Even the
-   * middleware will eventually dispatch plain object actions using this method.
-   *
-   * @param {Object} action A plain object representing “what changed”. It is
-   * a good idea to keep actions serializable so you can record and replay user
-   * sessions, or use the time travelling `redux-devtools`. An action must have
-   * a `type` property which may not be `undefined`. It is a good idea to use
-   * string constants for action types.
-   *
-   * @returns {Object} For convenience, the same action object you dispatched.
-   *
-   * Note that, if you use a custom middleware, it may wrap `dispatch()` to
-   * return something else (for example, a Promise you can await).
+   * @returns {Object} 返回dispatch的action
+   * 
+   * 注意：如果你自定义中间件(middleware)，它可能包装'dispatch()'返回其他一些东西，如Promise
    */
   function dispatch(action) {
+    // action是plain object，否则会报错
     if (!isPlainObject(action)) {
       throw new Error(
         'Actions must be plain objects. ' +
@@ -171,6 +156,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       )
     }
 
+    // action的type如果是undefined，则抛出错误
     if (typeof action.type === 'undefined') {
       throw new Error(
         'Actions may not have an undefined "type" property. ' +
@@ -178,18 +164,25 @@ export default function createStore(reducer, preloadedState, enhancer) {
       )
     }
 
+    // reducer在处理的时候不能dispatch action
     if (isDispatching) {
       throw new Error('Reducers may not dispatch actions.')
     }
 
     try {
+      // 标记dispatch正在运行
       isDispatching = true
+      // 执行当前的reducer函数返回新的state
       currentState = currentReducer(currentState, action)
     } finally {
+      // finally 标记dispatch没有在运行
       isDispatching = false
     }
 
+    // 将所有的监听函数赋值给listeners
     const listeners = (currentListeners = nextListeners)
+
+    // 遍历执行每一个监听函数
     for (let i = 0; i < listeners.length; i++) {
       const listener = listeners[i]
       listener()
@@ -199,13 +192,14 @@ export default function createStore(reducer, preloadedState, enhancer) {
   }
 
   /**
-   * Replaces the reducer currently used by the store to calculate the state.
+   * replaceReducer是替换当前的reducer的函数
+   * 
+   * 使用replaceRuducer的几种场景：
+   * 1.当你程序需要代码分割的时候
+   * 2.当你要动态地加载不同的reducer的时候
+   * 3.当你需要实现一个实时reloading机制的时候
    *
-   * You might need this if your app implements code splitting and you want to
-   * load some of the reducers dynamically. You might also need this if you
-   * implement a hot reloading mechanism for Redux.
-   *
-   * @param {Function} nextReducer The reducer for the store to use instead.
+   * @param {Function} nextReducer store需要使用的下一个reducer
    * @returns {void}
    */
   function replaceReducer(nextReducer) {
@@ -213,32 +207,27 @@ export default function createStore(reducer, preloadedState, enhancer) {
       throw new Error('Expected the nextReducer to be a function.')
     }
 
+    //
     currentReducer = nextReducer
     dispatch({ type: ActionTypes.REPLACE })
   }
 
   /**
-   * Interoperability point for observable/reactive libraries.
-   * @returns {observable} A minimal observable of state changes.
-   * For more information, see the observable proposal:
+   * 这个API只能redux内部使用到。在测试用例中有使用到
+   * @returns {observable} 状态改变时返回最小的observable
+   * 如果你想知道更多信息，可以看observable提议：
    * https://github.com/tc39/proposal-observable
    */
   function observable() {
     const outerSubscribe = subscribe
     return {
-      /**
-       * The minimal observable subscription method.
-       * @param {Object} observer Any object that can be used as an observer.
-       * The observer object should have a `next` method.
-       * @returns {subscription} An object with an `unsubscribe` method that can
-       * be used to unsubscribe the observable from the store, and prevent further
-       * emission of values from the observable.
-       */
       subscribe(observer) {
+        // 判断observer是一个对象
         if (typeof observer !== 'object' || observer === null) {
           throw new TypeError('Expected the observer to be an object.')
         }
 
+        // 获取观察者的状态
         function observeState() {
           if (observer.next) {
             observer.next(getState())
@@ -246,26 +235,28 @@ export default function createStore(reducer, preloadedState, enhancer) {
         }
 
         observeState()
+        // 返回一个取消订阅的方法
         const unsubscribe = outerSubscribe(observeState)
         return { unsubscribe }
       },
 
+      // 对象的私有属性
       [$$observable]() {
         return this
       }
     }
   }
 
-  // When a store is created, an "INIT" action is dispatched so that every
-  // reducer returns their initial state. This effectively populates
-  // the initial state tree.
+  // reducer返回他们的初始状态
+  // 初始化store里的state tree
   dispatch({ type: ActionTypes.INIT })
 
+  // 返回store暴露出来的接口
   return {
-    dispatch,
-    subscribe,
-    getState,
-    replaceReducer,
-    [$$observable]: observable
+    dispatch, // 唯一一个可以改变state的函数
+    subscribe, // 订阅一个状态改变后，要触发的监听函数
+    getState, // 获取store里的state
+    replaceReducer, // Redux热加载的时候替换Reducer
+    [$$observable]: observable // 对象的私有属性，供内部使用
   }
 }
