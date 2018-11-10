@@ -7,8 +7,8 @@ import warning from './utils/warning'
 import __DO_NOT_USE__ActionTypes from './utils/actionTypes'
 
 /*
- * This is a dummy function to check if the function name has been altered by minification.
- * If the function has been minified and NODE_ENV !== 'production', warn the user.
+ * 验证redux在生产环境下是否被压缩
+ * 默认情况下isCrushed.name === 'isCrushed',如果压缩了则不相等
  */
 function isCrushed() {}
 

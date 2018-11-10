@@ -3,33 +3,10 @@ import $$observable from 'symbol-observable'
 import ActionTypes from './utils/actionTypes'
 import isPlainObject from './utils/isPlainObject'
 
-/**
- * Creates a Redux store that holds the state tree.
- * The only way to change the data in the store is to call `dispatch()` on it.
- *
- * There should only be a single store in your app. To specify how different
- * parts of the state tree respond to actions, you may combine several reducers
- * into a single reducer function by using `combineReducers`.
- *
- * @param {Function} reducer A function that returns the next state tree, given
- * the current state tree and the action to handle.
- *
- * @param {any} [preloadedState] The initial state. You may optionally specify it
- * to hydrate the state from the server in universal apps, or to restore a
- * previously serialized user session.
- * If you use `combineReducers` to produce the root reducer function, this must be
- * an object with the same shape as `combineReducers` keys.
- *
- * @param {Function} [enhancer] The store enhancer. You may optionally specify it
- * to enhance the store with third-party capabilities such as middleware,
- * time travel, persistence, etc. The only store enhancer that ships with Redux
- * is `applyMiddleware()`.
- *
- * @returns {Store} A Redux store that lets you read the state, dispatch actions
- * and subscribe to changes.
- */
+// createStore会生成一个store，用来维护一个全局的store
 export default function createStore(reducer, preloadedState, enhancer) {
   if (
+    // 对传入的参数校验，不合适则报错
     (typeof preloadedState === 'function' && typeof enhancer === 'function') ||
     (typeof enhancer === 'function' && typeof arguments[3] === 'function')
   ) {
@@ -40,39 +17,48 @@ export default function createStore(reducer, preloadedState, enhancer) {
     )
   }
 
+  // 只传入reducer和enhancer的情况
   if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
     enhancer = preloadedState
     preloadedState = undefined
   }
 
+  // 如果enhancer存在且是函数，则调用enhancer(createStore)(reducer, preloadedState)，并终止函数的执行
   if (typeof enhancer !== 'undefined') {
     if (typeof enhancer !== 'function') {
       throw new Error('Expected the enhancer to be a function.')
     }
 
+    // 返回调用enhancer强化之后的store
     return enhancer(createStore)(reducer, preloadedState)
   }
 
+  // 对传入的reducer做校验
   if (typeof reducer !== 'function') {
     throw new Error('Expected the reducer to be a function.')
   }
 
+  // 存储当前的reducer
   let currentReducer = reducer
+  // 存储当前的状态
   let currentState = preloadedState
+  // 声明当前的监听函数列表为空数组
   let currentListeners = []
+  // 存储下一个监听函数列表,nextListeners和currentListners指向同一个引用
   let nextListeners = currentListeners
+  // 是否正在“dispatch”分发事件
   let isDispatching = false
 
-  function ensureCanMutateNextListeners() {
+  // 根据当前监听函数列表生成下一个监听函数列表的引用
+  function ensureCanMutateNextListeners() { 
     if (nextListeners === currentListeners) {
+      // 通过数组的slice方法将currentListeners复制给nextListeners
       nextListeners = currentListeners.slice()
     }
   }
 
   /**
-   * Reads the state tree managed by the store.
-   *
-   * @returns {any} The current state tree of your application.
+   * getState方法会返回最新的state tree
    */
   function getState() {
     if (isDispatching) {
@@ -87,33 +73,28 @@ export default function createStore(reducer, preloadedState, enhancer) {
   }
 
   /**
-   * Adds a change listener. It will be called any time an action is dispatched,
-   * and some part of the state tree may potentially have changed. You may then
-   * call `getState()` to read the current state tree inside the callback.
+   * 添加一个listener监听函数，当dispatch被调用的时候，这时state已经发生了一些变化
+   * 你可以在listener函数调用getState()获取当前的state
    *
-   * You may call `dispatch()` from a change listener, with the following
-   * caveats:
+   * 你可以在listener改变的时候调用dispatch，但有一些注意事项：
    *
-   * 1. The subscriptions are snapshotted just before every `dispatch()` call.
-   * If you subscribe or unsubscribe while the listeners are being invoked, this
-   * will not have any effect on the `dispatch()` that is currently in progress.
-   * However, the next `dispatch()` call, whether nested or not, will use a more
-   * recent snapshot of the subscription list.
-   *
-   * 2. The listener should not expect to see all state changes, as the state
-   * might have been updated multiple times during a nested `dispatch()` before
-   * the listener is called. It is, however, guaranteed that all subscribers
-   * registered before the `dispatch()` started will be called with the latest
-   * state by the time it exits.
-   *
-   * @param {Function} listener A callback to be invoked on every dispatch.
-   * @returns {Function} A function to remove this change listener.
+   * 1.subscriptions（订阅器）在每次dispatch之前都会保存一份快照
+   * 当你正在调用监听器(listener)的时候订阅(subscribe)或者取消订阅（unsubscribe），
+   * 对当前的dispatch()不会有任何影响。但对于下一次的dispatch(),无论嵌套与否，都会使用订阅列表里最近一次的快照。
+   * 
+   * 2.listener监听函数不应该监听所有state的变化，在嵌套的dispatch()导致多处的state发生多次的变化，
+   * 我们应该保证所有的监听函数都注册在dispatch之前
+
+   * @param {Function} listener 要监听的函数
+   * @returns {Function} 一个可以移除监听的函数
    */
   function subscribe(listener) {
+    // 如果listener不是函数类型会抛出异常
     if (typeof listener !== 'function') {
       throw new Error('Expected the listener to be a function.')
     }
 
+    // 如果正在“dispatch”分发事件会报错
     if (isDispatching) {
       throw new Error(
         'You may not call store.subscribe() while the reducer is executing. ' +
@@ -123,12 +104,17 @@ export default function createStore(reducer, preloadedState, enhancer) {
       )
     }
 
+    // 标记有订阅的listener
     let isSubscribed = true
 
+    // 保存一份快照
     ensureCanMutateNextListeners()
+    // 添加一个订阅函数
     nextListeners.push(listener)
 
+    // 返回一个取消订阅函数
     return function unsubscribe() {
+      // 如果没有订阅一个listener，return；
       if (!isSubscribed) {
         return
       }
@@ -140,10 +126,14 @@ export default function createStore(reducer, preloadedState, enhancer) {
         )
       }
 
+      // 标记还没有订阅的listener
       isSubscribed = false
 
+      // 保存一份订阅快照
       ensureCanMutateNextListeners()
+      // 找到当前的listener
       const index = nextListeners.indexOf(listener)
+      // 移除当前的listener
       nextListeners.splice(index, 1)
     }
   }
