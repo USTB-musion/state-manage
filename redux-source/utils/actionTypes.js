@@ -1,8 +1,8 @@
 /**
- * These are private action types reserved by Redux.
- * For any unknown actions, you must return the current state.
- * If the current state is undefined, you must return the initial state.
- * Do not reference these action types directly in your code.
+ * 这些是Redux使用的私有action types
+ * 如果actions匹配不上，返回current state
+ * 如果current state没有定义，返回initial state
+ * 不要在自己的项目中使用这些action types
  */
 
 const randomString = () =>
